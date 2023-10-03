@@ -1,22 +1,20 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 
-import javax.swing.plaf.synth.SynthSeparatorUI;
 
 public class geneticAlgo {
     public static void main(String[] args) {
         String[] availableTypes = {"x", "y", "z"};
         int[] availableQuantities = {30, 21, 30};
-        int numThreads = 2; // Adjust this to your desired number of threads
-        int numGenerations = 1000; // Adjust the number of generations as needed
-        int eliminationRate = 95; // Adjust this to set the elimination rate (percentage)
+        int numThreads = 4; 
+        int numGenerations = 50;
+        int eliminationRate = 95; 
     
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
     
-        // Initialize the population of floor plans
+        //Pop of floorplans 4d array :o - definitely not the best way to do it
         Machine[][][][] population = new Machine[numGenerations][numThreads][9][9];
         for (int generation = 0; generation < numGenerations; generation++) {
             for (int threadIndex = 0; threadIndex < numThreads; threadIndex++) {
@@ -60,10 +58,11 @@ public class geneticAlgo {
                     }
                 }
     
-                // Print the best floor plan found in this generation
-                printFloor(bestFloor);
+                if(generation % 2 == 1){
+                    printFloor(bestFloor);
+                }
+                
     
-                // Eliminate the least fit individuals (floor plans)
                 int numToEliminate = (eliminationRate * population[generation].length) / 100;
                 eliminateLeastFit(population[generation], numToEliminate, availableTypes, availableQuantities);
     
@@ -153,14 +152,15 @@ public class geneticAlgo {
     }
 
     public static Machine[][] randomFloorPlan(int x, int y, String[] types, int[] qnt){
-        int[] q = qnt;
+        int[] q = qnt.clone();
         Machine[][] floor = createFloor(x,y);
 
         for(int i = 0; i < y; i++){
             for(int j = 0; j < x;j++){
                 int rand_y = Math.round(Math.round(Math.random() * (types.length-1)+0));
-                if(qnt[rand_y] > 0){
+                if(q[rand_y] > 0){
                     floor[i][j] = new Machine(types[rand_y], floor, i, j);
+                    q[rand_y]--;
                 }
             }
         }
